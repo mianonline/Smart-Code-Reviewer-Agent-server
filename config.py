@@ -13,11 +13,7 @@ class Settings:
     HOST: str = "0.0.0.0"
     
     # CORS Configuration
-    ALLOWED_ORIGINS: list = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        
-    ]
+    ALLOWED_ORIGINS: list = ["*"]
     
     # File Upload Configuration
     MAX_FILE_SIZE: int = 1024 * 1024 
