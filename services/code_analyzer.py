@@ -1,16 +1,16 @@
 import json
 from typing import Dict, Any
 from config import settings
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 
 class CodeAnalyzer:    
     def __init__(self):
-        # Initialize LangChain model
-        self.llm = ChatOpenAI(
-            api_key=settings.OPENAI_API_KEY,
-            model=settings.OPENAI_MODEL,
+        # Initialize LangChain Groq model
+        self.llm = ChatGroq(
+            api_key=settings.GROQ_API_KEY,
+            model_name=settings.GROQ_MODEL,
             temperature=0.2
         )
         self.parser = JsonOutputParser()
