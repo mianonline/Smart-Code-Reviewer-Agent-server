@@ -1,37 +1,43 @@
 import json
-from openai import OpenAI
 from typing import Dict, Any
 from config import settings
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import JsonOutputParser
 
 class CodeAnalyzer:    
     def __init__(self):
-        self.client = OpenAI(api_key=settings.OPENAI_API_KEY)
-        self.model = settings.OPENAI_MODEL
+        # Initialize LangChain model
+        self.llm = ChatOpenAI(
+            api_key=settings.OPENAI_API_KEY,
+            model=settings.OPENAI_MODEL,
+            temperature=0.2
+        )
+        self.parser = JsonOutputParser()
     
     def analyze_code(self, code: str, language: str) -> Dict[str, Any]:
         """
-        Analyze code and return structured feedback
+        Analyze code and return structured feedback using LangChain
         """
-        prompt = self._build_review_prompt(code, language)
-        
-        
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": "You are a senior software engineer conducting a thorough code review. You must respond with valid JSON only."},
-                    {"role": "user", "content": prompt}
-                ],
-                response_format={ "type": "json_object" },
-                max_tokens=2000
-            )
+            prompt_template = ChatPromptTemplate.from_messages([
+                ("system", "You are a senior software engineer conducting a thorough code review. You must respond with valid JSON only."),
+                ("user", self._get_review_prompt_template())
+            ])
             
-            result = json.loads(response.choices[0].message.content)
+            # Create a chain: Prompt -> LLM -> Parser
+            chain = prompt_template | self.llm | self.parser
+            
+            result = chain.invoke({
+                "code": code,
+                "language": language.upper()
+            })
+            
             return result
             
         except Exception as e:
-            
-            print(f"DEBUG: OpenAI API Call failed ({str(e)}). Using Mock Mode.")
+            # Fallback to Mock Data if API fails
+            print(f"DEBUG: LangChain/OpenAI API Call failed ({str(e)}). Using Mock Mode.")
             return {
                 "score": 8,
                 "issues": [
@@ -44,50 +50,39 @@ class CodeAnalyzer:
                     "Add return type annotations to your functions.",
                     "Consider using a list comprehension for better performance."
                 ],
-                "reasoning": f"Your code is functional and well-structured. I am providing this mock response because your OpenAI API reported: '{str(e)[:50]}...'. This allows you to test the UI beauty and flow while you sort out the API billing."
+                "reasoning": f"Your code is functional and well-structured. I am providing this mock response because your AI service reported: '{str(e)[:50]}...'. This allows you to test the UI beauty and flow while you sort out the API configuration."
             }
 
     def generate_code(self, prompt: str, language: str) -> Dict[str, Any]:
         """
-        Generate code based on a prompt
+        Generate code based on a prompt using LangChain
         """
-        system_prompt = f"You are an expert {language} developer. Generate clean, efficient, and well-documented code. You must respond with valid JSON only."
-        user_prompt = f"""Task: {prompt}
-Language: {language}
-
-You must respond with a JSON object in this exact format:
-{{
-    "code": "<the generated code string>",
-    "explanation": "<brief explanation of how the code works>",
-    "language": "{language}"
-}}
-"""
-        
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                response_format={ "type": "json_object" },
-                max_tokens=2000
-            )
+            prompt_template = ChatPromptTemplate.from_messages([
+                ("system", "You are an expert {language} developer. Generate clean, efficient, and well-documented code. You must respond with valid JSON only."),
+                ("user", self._get_generation_prompt_template())
+            ])
             
-            result = json.loads(response.choices[0].message.content)
+            chain = prompt_template | self.llm | self.parser
+            
+            result = chain.invoke({
+                "prompt": prompt,
+                "language": language
+            })
+            
             return result
             
         except Exception as e:
-            print(f"DEBUG: OpenAI Generation API Call failed ({str(e)}). Using Mock Mode.")
+            print(f"DEBUG: LangChain Generation API Call failed ({str(e)}). Using Mock Mode.")
             return {
                 "code": f"// Mock code for: {prompt}\nfunction example() {{\n  console.log('AI Generation is currently in mock mode.');\n}}",
-                "explanation": "This is a fallback response since the OpenAI API encountered an error.",
+                "explanation": "This is a fallback response since the AI service encountered an error.",
                 "language": language
             }
     
-    def _build_review_prompt(self, code: str, language: str) -> str:
-        """Build the user prompt for code review"""
-        return f"""Analyze the following {language.upper()} code and provide constructive feedback.
+    def _get_review_prompt_template(self) -> str:
+        """Instruction template for code review"""
+        return """Analyze the following {language} code and provide constructive feedback.
 
 Code to review:
 ```{language}
@@ -107,4 +102,17 @@ Scoring criteria:
 - 4-6: Needs improvement
 - 7-8: Good quality
 - 9-10: Excellent/Clean code
+"""
+
+    def _get_generation_prompt_template(self) -> str:
+        """Instruction template for code generation"""
+        return """Task: {prompt}
+Language: {language}
+
+You must respond with a JSON object in this exact format:
+{{
+    "code": "<the generated code string>",
+    "explanation": "<brief explanation of how the code works>",
+    "language": "{language}"
+}}
 """
