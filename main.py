@@ -1,7 +1,15 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
-from models.schemas import CodeReviewRequest, CodeReviewResponse, HealthResponse, CodeGenerationRequest, CodeGenerationResponse
+from models.schemas import (
+    CodeReviewRequest, 
+    CodeReviewResponse, 
+    HealthResponse, 
+    CodeGenerationRequest, 
+    CodeGenerationResponse,
+    ChatRequest,
+    ChatResponse
+)
 from services.code_analyzer import CodeAnalyzer
 from utils.validators import CodeValidator
 from config import settings
@@ -126,6 +134,27 @@ async def generate_code(request: CodeGenerationRequest):
             explanation=result["explanation"],
             language=request.language
         )
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/chat", response_model=ChatResponse)
+async def chat_followup(request: ChatRequest):
+    """
+    Follow-up chat about a code review
+    """
+    try:
+        # Convert Request model messages to list of dicts
+        history = [{"role": msg.role, "content": msg.content} for msg in request.messages]
+        
+        response_content = analyzer.chat(
+            code=request.code,
+            review_context=request.review_context,
+            messages=history,
+            language=request.language
+        )
+        return ChatResponse(content=response_content)
     except Exception as e:
         import traceback
         traceback.print_exc()

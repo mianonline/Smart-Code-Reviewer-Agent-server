@@ -42,3 +42,18 @@ class CodeGenerationResponse(BaseModel):
     code: str = Field(..., description="The generated code")
     explanation: str = Field(..., description="Explanation of how the code works")
     language: str = Field(..., description="Programming language used")
+
+class ChatMessage(BaseModel):
+    role: str # 'user' or 'assistant'
+    content: str
+
+class ChatRequest(BaseModel):
+    """Request model for follow-up chat"""
+    code: str = Field(..., description="The code context")
+    review_context: str = Field(..., description="The previous review feedback")
+    messages: List[ChatMessage] = Field(..., description="Conversation history")
+    language: str = Field(..., description="Programming language")
+
+class ChatResponse(BaseModel):
+    """Response model for chat"""
+    content: str = Field(..., description="AI's response")
