@@ -4,8 +4,12 @@ from .state import ReviewState
 def style_node(state: ReviewState, llm, parser):
     """Node focused on clean code, naming, and PEP/Style guides"""
     prompt = ChatPromptTemplate.from_template(
-        "Clean Code Architect: Analyze this {language} code for readability, naming, and style.\n"
-        "Return JSON: {{\"issues\": [string], \"score\": int, \"suggestions\": [string]}}\nCode:\n```{language}\n{code}\n```"
+        "You are a Code Style Expert. Analyze this {language} code for style and readability.\n"
+        "Look for: naming conventions, code organization, comments, best practices.\n\n"
+        "Code:\n```{language}\n{code}\n```\n\n"
+        "CRITICAL: You MUST respond with ONLY a valid JSON object. No markdown, no explanation, no text before or after.\n"
+        "JSON format: {{\"issues\": [\"issue1\"], \"score\": 8, \"suggestions\": [\"suggestion1\"]}}\n"
+        "Score: 1-10 (10 = cleanest code). If no issues, return empty arrays."
     )
     chain = prompt | llm | parser
     res = chain.invoke({"code": state["code"], "language": state["language"]})

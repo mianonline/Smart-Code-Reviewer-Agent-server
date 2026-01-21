@@ -26,6 +26,7 @@ class CodeReviewResponse(BaseModel):
     suggestions: List[str] = Field(default_factory=list, description="List of improvement suggestions")
     reasoning: str = Field(..., description="Detailed explanation of the score and feedback")
     language: str = Field(..., description="Programming language analyzed")
+    session_id: Optional[str] = None
 
 class HealthResponse(BaseModel):
     """Health check response"""
@@ -53,6 +54,7 @@ class ChatRequest(BaseModel):
     review_context: str = Field(..., description="The previous review feedback")
     messages: List[ChatMessage] = Field(..., description="Conversation history")
     language: str = Field(..., description="Programming language")
+    session_id: Optional[str] = None
 
 class ChatResponse(BaseModel):
     """Response model for chat"""

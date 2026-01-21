@@ -4,8 +4,12 @@ from .state import ReviewState
 def security_node(state: ReviewState, llm, parser):
     """Node focused on security vulnerabilities"""
     prompt = ChatPromptTemplate.from_template(
-        "Security Expert: Analyze this {language} code for vulnerabilities (SQLi, XSS, etc.).\n"
-        "Return JSON: {{\"issues\": [string], \"score\": int}}\nCode:\n```{language}\n{code}\n```"
+        "You are a Security Expert. Analyze this {language} code for security vulnerabilities.\n"
+        "Look for: SQL injection, XSS, path traversal, hardcoded secrets, etc.\n\n"
+        "Code:\n```{language}\n{code}\n```\n\n"
+        "CRITICAL: You MUST respond with ONLY a valid JSON object. No markdown, no explanation, no text before or after.\n"
+        "JSON format: {{\"issues\": [\"issue1\", \"issue2\"], \"score\": 8}}\n"
+        "Score: 1-10 (10 = most secure). If no issues, return empty array for issues."
     )
     chain = prompt | llm | parser
     res = chain.invoke({"code": state["code"], "language": state["language"]})

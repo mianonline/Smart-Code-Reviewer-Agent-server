@@ -13,7 +13,7 @@ class Settings:
     HOST: str = "0.0.0.0"
     
     # CORS Configuration
-    ALLOWED_ORIGINS: list = ["*"]
+    ALLOWED_ORIGINS: list = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
     
     # File Upload Configuration
     MAX_FILE_SIZE: int = 1024 * 1024 
@@ -26,5 +26,10 @@ class Settings:
         "improvable": (4, 6),
         "poor": (0, 3)
     }
+    
+    # Cloudinary Configuration
+    CLOUDINARY_CLOUD_NAME: str = os.getenv("CLOUDINARY_CLOUD_NAME", "")
+    CLOUDINARY_API_KEY: str = os.getenv("CLOUDINARY_API_KEY", "")
+    CLOUDINARY_API_SECRET: str = os.getenv("CLOUDINARY_API_SECRET", "")
 
 settings = Settings()
