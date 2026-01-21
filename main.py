@@ -21,11 +21,24 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+from fastapi import Request
+import time
+
+# Logging Middleware
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = (time.time() - start_time) * 1000
+    formatted_process_time = "{0:.2f}".format(process_time)
+    print(f"DEBUG: {request.method} {request.url.path} - Status: {response.status_code} - Origin: {request.headers.get('origin')} - Time: {formatted_process_time}ms")
+    return response
+
 # CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
-    allow_origin_regex=r"http://(localhost|127\.0\.0\.1|\[::1\])(:\d+)?",
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1|\[::1\]|.*\.vercel\.app)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

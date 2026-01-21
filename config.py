@@ -13,7 +13,7 @@ class Settings:
     HOST: str = "0.0.0.0"
     
     # CORS Configuration
-    ALLOWED_ORIGINS: list = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+    ALLOWED_ORIGINS: list = [o.strip().strip('"').strip("'") for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
     
     # File Upload Configuration
     MAX_FILE_SIZE: int = 1024 * 1024 
