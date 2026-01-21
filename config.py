@@ -17,7 +17,7 @@ class Settings:
     
     # File Upload Configuration
     MAX_FILE_SIZE: int = 1024 * 1024 
-    ALLOWED_EXTENSIONS: set = {".js", ".ts", ".py"}
+    ALLOWED_EXTENSIONS: set = {".js", ".ts", ".py", ".html", ".css", ".json", ".c", ".cpp", ".php"}
     
     # Scoring Criteria
     SCORE_CRITERIA = {

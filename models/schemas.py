@@ -8,7 +8,7 @@ class CodeReviewRequest(BaseModel):
     
     @validator('language')
     def validate_language(cls, v):
-        allowed_languages = ['javascript', 'typescript', 'python']
+        allowed_languages = ['javascript', 'typescript', 'python', 'html', 'css', 'json', 'c', 'cpp', 'php']
         if v.lower() not in allowed_languages:
             raise ValueError(f'Language must be one of: {", ".join(allowed_languages)}')
         return v.lower()

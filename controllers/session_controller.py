@@ -28,3 +28,15 @@ async def get_session_by_id(session_id: str, user_id: str):
     
     doc["id"] = str(doc.pop("_id"))
     return doc
+
+async def delete_session(session_id: str, user_id: str):
+    db_conn = get_db()
+    try:
+        result = await db_conn.sessions.delete_one({"_id": ObjectId(session_id), "user_id": user_id})
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid session ID format")
+        
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Session not found or permission denied")
+    
+    return {"message": "Session deleted successfully"}
