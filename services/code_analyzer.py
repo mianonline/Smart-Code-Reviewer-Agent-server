@@ -29,18 +29,14 @@ class CodeAnalyzer:
     def _build_review_graph(self):
         workflow = StateGraph(ReviewState)
 
-        # Partial functions to inject dependencies into nodes
         security_call = partial(security_node, llm=self.llm, parser=self.parser)
         performance_call = partial(performance_node, llm=self.llm, parser=self.parser)
         style_call = partial(style_node, llm=self.llm, parser=self.parser)
 
-        # Define Nodes
         workflow.add_node("security_expert", security_call)
         workflow.add_node("performance_guru", performance_call)
         workflow.add_node("style_architect", style_call)
         workflow.add_node("aggregator", aggregator_node)
-
-        # Define Edges
         workflow.set_entry_point("security_expert")
         workflow.add_edge("security_expert", "performance_guru")
         workflow.add_edge("performance_guru", "style_architect")
@@ -112,7 +108,6 @@ class CodeAnalyzer:
         Hold a follow-up conversation about the code review
         """
         try:
-            # Prepare conversation history for LangChain
             history = []
             for msg in messages:
                 role = "human" if msg["role"] == "user" else "ai"
@@ -123,8 +118,6 @@ class CodeAnalyzer:
                 *history
             ])
             
-            # For chat, we don't necessarily need a JSON parser unless we want structured chat
-            # For now, simple string response is better for a chat interface
             chain = prompt_template | self.llm
             
             result = chain.invoke({

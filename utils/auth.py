@@ -10,7 +10,7 @@ load_dotenv()
 # JWT Configuration
 SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-key-12345")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 
 
 pwd_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 

@@ -15,8 +15,7 @@ db = Database()
 
 async def connect_to_mongo():
     try:
-        db.client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL)
-        # Send a ping to confirm a successful connection
+        db.client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL)   
         await db.client.admin.command('ping')
         db.db = db.client[DB_NAME]
         print(f"Successfully connected to MongoDB: {DB_NAME}")

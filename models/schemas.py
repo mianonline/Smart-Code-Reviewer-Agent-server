@@ -45,7 +45,7 @@ class CodeGenerationResponse(BaseModel):
     language: str = Field(..., description="Programming language used")
 
 class ChatMessage(BaseModel):
-    role: str # 'user' or 'assistant'
+    role: str
     content: str
 
 class ChatRequest(BaseModel):

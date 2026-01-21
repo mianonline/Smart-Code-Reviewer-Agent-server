@@ -35,6 +35,4 @@ class CodeValidator:
     @staticmethod
     def sanitize_code(code: str) -> str:
         """Sanitize code input (basic cleanup)"""
-        # Remove any potential harmful characters
-        # This is a basic implementation - can be enhanced
         return code.strip()
